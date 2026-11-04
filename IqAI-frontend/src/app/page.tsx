@@ -3,157 +3,135 @@
 import { useState } from "react";
 
 export default function Home() {
+  const [disputeId, setDisputeId] = useState("PP-R-UHP-10194813");
+  const [orderId, setOrderId] = useState("71B45819K54884907");
+  const [reason, setReason] = useState("MERCHANDISE_OR_SERVICE_NOT_RECEIVED");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  
-  // Estados para os cenários dinâmicos
-  const [scenario, setScenario] = useState({
-    reason: "ITEM_NOT_RECEIVED",
-    shipping_status: "DELIVERED",
-    amount: "75.00 USD"
-  });
 
-  const simulateDispute = async () => {
+  const handleExecuteRealAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
+    setResult(null);
+
     try {
-      const response = await fetch("http://localhost:8000/api/disputes/test-simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dispute_id: `DISP-${Math.floor(1000 + Math.random() * 9000)}`,
-          reason: scenario.reason,
-          shipping_status: scenario.shipping_status,
-          amount: scenario.amount
-        })
-      });
+    const response = await fetch("http://127.0.0.1:8000/api/disputes/sync-real", {
+  method: "POST",
+  headers: {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    dispute_id: disputeId,
+    order_id: orderId,
+    reason: reason
+  })
+});
       const data = await response.json();
-      setResult(data.agent_output);
+      setResult(data);
     } catch (error) {
-      console.error("Erro ao conectar com a API:", error);
+      console.error("Erro ao comunicar com a API:", error);
+      setResult({ error: "Falha ao conectar com o backend do FaQ-IA." });
     } finally {
       setLoading(false);
     }
   };
-  const syncRealPayPal = async () => {
-  setLoading(true);
-  try {
-    const response = await fetch("http://localhost:8000/api/disputes/sync-real");
-    const data = await response.json();
-    alert(`Sincronização PayPal Sandbox:\n${JSON.stringify(data, null, 2)}`);
-  } catch (error) {
-    console.error("Erro na sincronização:", error);
-  } finally {
-    setLoading(false);
-  }
-};
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-emerald-400">IqAI (Aicai)</h1>
-            <p className="text-slate-400 text-sm">Agente autónomo de disputas e finanças do PayPal</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 bg-blue-950 text-blue-400 border border-blue-800 rounded-full text-xs font-semibold">
-              Sandbox do PayPal ativo
-            </span>
-            <span className="px-3 py-1 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-full text-xs font-semibold">
-              Motor de IA Online
-            </span>
-          </div>
-        </header>
+    <main className="min-h-screen bg-[#0a0f1d] text-white p-8">
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-emerald-400">IqAI (Aicai)</h1>
+          <p className="text-sm text-gray-400">Agente autónomo de litígios e finanças do PayPal</p>
+        </div>
+        <div className="flex gap-3">
+          <span className="px-3 py-1 bg-blue-900/40 border border-blue-600 text-blue-400 text-xs rounded-full flex items-center gap-1">
+            🟢 Sandbox do PayPal Ativo
+          </span>
+          <span className="px-3 py-1 bg-emerald-900/40 border border-emerald-600 text-emerald-400 text-xs rounded-full flex items-center gap-1">
+            🟢 Motor de IA Online (Groq)
+          </span>
+        </div>
+      </div>
 
-        {/* Action Card / Scenario Selector */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-8 shadow-xl space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Simulador de Cenários Reais de Litígio</h2>
-            <p className="text-slate-400 text-sm">
-              Selecione as variáveis do litígio. O agente autónomo irá analisar o caso em tempo real com a Groq e decidir a estratégia ideal.
-            </p>
-          </div>
+      {/* Módulo Principal de Execução Real */}
+      <div className="max-w-4xl mx-auto bg-[#111827] border border-gray-800 rounded-xl p-6 shadow-xl">
+        <h2 className="text-lg font-semibold mb-2">Painel de Ação Autónoma em Tempo Real</h2>
+        <p className="text-sm text-gray-400 mb-6">
+          Personaliza os parâmetros abaixo e aciona o agente para consultar transações, analisar litígios com IA e disparar ferramentas e ações no PayPal.
+        </p>
 
-          <div className="grid grid-cols-3 gap-4">
+        <form onSubmit={handleExecuteRealAgent} className="space-y-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-slate-400 block mb-2">MOTIVO DA DISPUTA</label>
-              <select
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"
-                value={scenario.reason}
-                onChange={(e) => setScenario({ ...scenario, reason: e.target.value })}
-              >
-                <option value="ITEM_NOT_RECEIVED">Item Não Recebido (INR)</option>
-                <option value="SNAD_DAMAGED">Produto Danificado / Incorreto</option>
-                <option value="UNAUTHORIZED_TRANSACTION">Transação Não Autorizada</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs text-slate-400 block mb-2">STATUS LOGÍSTICO</label>
-              <select
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"
-                value={scenario.shipping_status}
-                onChange={(e) => setScenario({ ...scenario, shipping_status: e.target.value })}
-              >
-                <option value="DELIVERED">DELIVERED (Entregue com Sucesso)</option>
-                <option value="IN_TRANSIT">IN_TRANSIT (Em Trânsito / Atrasado)</option>
-                <option value="LOST">LOST (Extraviado pela Transportadora)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs text-slate-400 block mb-2">VALOR DA TRANSAÇÃO</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Dispute ID (PayPal Case ID)</label>
               <input
                 type="text"
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"
-                value={scenario.amount}
-                onChange={(e) => setScenario({ ...scenario, amount: e.target.value })}
+                value={disputeId}
+                onChange={(e) => setDisputeId(e.target.value)}
+                className="w-full bg-[#030712] border border-gray-800 rounded-lg p-2.5 text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Order / Transaction ID</label>
+              <input
+                type="text"
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value)}
+                className="w-full bg-[#030712] border border-gray-800 rounded-lg p-2.5 text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
+                required
               />
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-medium text-gray-300 mb-1">Motivo do Litígio / Cenário da IA (Reason)</label>
+            <input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full bg-[#030712] border border-gray-800 rounded-lg p-2.5 text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-mono"
+              placeholder="Ex: MERCHANDISE_OR_SERVICE_NOT_RECEIVED ou BUYER_CLAIMS_DAMAGED_ITEM..."
+              required
+            />
+          </div>
+
           <button
-            onClick={simulateDispute}
+            type="submit"
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-3 rounded-lg transition-all shadow-lg disabled:opacity-50 cursor-pointer"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg flex justify-center items-center gap-2 disabled:opacity-50 mt-2"
           >
-            {loading ? "O Agente Groq está a analisar..." : "Executar Análise Autônoma do Agente"}
+            {loading ? "A processar com IA e a sincronizar com o PayPal..." : "Executar Agente Autónomo (Modo Real Sandbox)"}
           </button>
-        </div>
+        </form>
 
-        {/* Results */}
+        {/* Exibição de Resultados Reais e Ferramentas (MCP) */}
         {result && (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl animate-fadeIn space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400">Relatório de Decisão do Agente de IA</h3>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                <span className="text-xs text-slate-500 block mb-1">ID DA DISPUTA</span>
-                <span className="font-mono text-slate-200 text-sm">{result.dispute_id}</span>
-              </div>
-              <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-  <span className="text-xs text-slate-500 block mb-1">AÇÃO TOMADA</span>
-  <span className={`font-bold text-sm ${
-    result.ai_decision === 'CONTEST' ? 'text-blue-400' :
-    result.ai_decision === 'REQUEST_EVIDENCE' ? 'text-purple-400' :
-    result.ai_decision === 'REFUND' ? 'text-amber-400' : 'text-rose-400'
-  }`}>
-    {result.ai_decision === 'REQUEST_EVIDENCE' ? 'SOLICITAR EVIDÊNCIAS (FOTO/VÍDEO)' :
-     result.ai_decision === 'CONTEST' ? 'CONTESTAR DISPUTA' :
-     result.ai_decision === 'REFUND' ? 'APROVAR REEMBOLSO' : 'ESCALAR PARA REVISÃO HUMANA'}
-  </span>
-</div>
-              <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                <span className="text-xs text-slate-500 block mb-1">API DO PAYPAL - STATUS</span>
-                <span className="text-emerald-400 font-mono text-xs">{result.paypal_status}</span>
-              </div>
+          <div className="mt-6 bg-[#030712] border border-gray-800 rounded-lg p-4 font-mono text-xs text-emerald-300 overflow-x-auto space-y-4">
+            <div>
+              <h3 className="text-gray-400 font-bold mb-2 uppercase tracking-wider">Resultado da Execução do Agente:</h3>
+              <pre>{JSON.stringify(result, null, 2)}</pre>
             </div>
 
-            <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-              <span className="text-xs text-slate-500 block mb-1">CADEIA DE RACIOCÍNIO DO AGENTE (LLM LOG)</span>
-              <p className="text-slate-300 text-sm font-mono leading-relaxed">{result.ai_reasoning}</p>
-            </div>
+            {/* Destaque visual se a ferramenta de upload for acionada (REQUEST_INFO) */}
+            {result.tool_output && (
+              <div className="bg-indigo-950/40 border border-indigo-800 p-4 rounded-lg text-indigo-200">
+                <span className="font-bold text-indigo-400 uppercase tracking-wider block mb-1">
+                  ⚡ Ação da Ferramenta Autónoma (MCP / Tool-Calling)
+                </span>
+                <p className="mb-2">{result.tool_output.message}</p>
+                <a
+                  href={result.tool_output.upload_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded transition"
+                >
+                  Abrir Link de Upload Seguro para o Comprador ↗
+                </a>
+              </div>
+            )}
           </div>
         )}
       </div>

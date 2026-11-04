@@ -4,6 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.controllers.dispute_controller import router as dispute_router
 
+from fastapi import FastAPI
+from app.routers.disputes import router as disputes_router  # Certifica-te deste import
+
+
 
 
 load_dotenv()
@@ -23,6 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(disputes_router)
 @app.get("/")
 def read_root():
     return {"status": "online", "app": "IqAI API", "module": "MVC Ready"}
