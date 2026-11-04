@@ -42,7 +42,7 @@ async def analyze_dispute_node(state: DisputeState) -> DisputeState:
     
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Modelo atualizado e otimizado na Groq
+            model="whisper-large-v3-turbo ",  # Modelo atualizado e otimizado na Groq
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
