@@ -15,7 +15,8 @@ export default function Home() {
     setResult(null);
 
     try {
-    const response = await fetch("http://127.0.0.1:8000/api/disputes/sync-real", {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://iqai-n0m8.onrender.com";
+    const response = await fetch(`${API_URL}/api/disputes/sync-real`, {
   method: "POST",
   headers: {
     "Accept": "application/json",
