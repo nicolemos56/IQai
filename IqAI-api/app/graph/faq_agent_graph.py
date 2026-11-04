@@ -1,5 +1,6 @@
 import os
 import httpx
+import json
 from typing import TypedDict, Literal, Optional
 from langgraph.graph import StateGraph, END
 from groq import Groq
@@ -19,20 +20,21 @@ async def analyze_dispute_node(state: DisputeState) -> DisputeState:
     """
     Usa o modelo da Groq para ler os dados da disputa e decidir dinamicamente a ação.
     """
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    api_key = os.getenv("GROQ_API_KEY")
+    client = Groq(api_key=api_key)
     
     prompt = f"""
-    És o FaQ-IA, um agente autónomo de resolução de litígios de comércio eletrónico.
+    És o IQai, um agente autónomo de resolução de litígios de comércio eletrónico.
     Analisa os dados da disputa abaixo e escolhe UMA destas três decisões exatas:
     - CONTEST (se houver evidência clara de entrega ou razão para recusar o reembolso)
     - REQUEST_INFO (se precisares de mais provas ou fotos ao comprador)
     - ESCALATE (se o caso for complexo ou houver alto risco de fraude)
 
     Dados do Litígio:
-    - ID do Caso: {state['dispute_id']}
-    - Transação: {state['order_id']}
-    - Valor: {state['amount']}
-    - Motivo: {state['reason']}
+    - ID do Caso: {state.get('dispute_id')}
+    - Transação: {state.get('order_id')}
+    - Valor: {state.get('amount', 'N/A')}
+    - Motivo: {state.get('reason')}
 
     Responde estritamente no formato JSON:
     {{"decision": "CONTEST" ou "REQUEST_INFO" ou "ESCALATE", "reasoning": "Breve explicação da decisão"}}
@@ -40,11 +42,11 @@ async def analyze_dispute_node(state: DisputeState) -> DisputeState:
     
     try:
         response = client.chat.completions.create(
-            model="allam-2-7b",  # Ou o modelo Groq que estás a usar
+            model="llama-3.3-70b-versatile",  # Modelo atualizado e otimizado na Groq
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
-        import json
+        
         result = json.loads(response.choices[0].message.content)
         
         state["ai_decision"] = result.get("decision", "CONTEST")

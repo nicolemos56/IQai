@@ -2,13 +2,8 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from app.routers.disputes import router as disputes_router
 from app.controllers.dispute_controller import router as dispute_router
-
-from fastapi import FastAPI
-from app.routers.disputes import router as disputes_router  # Certifica-te deste import
-
-
-
 
 load_dotenv()
 
@@ -18,7 +13,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configurar CORS para permitir comunicação com o Next.js
+# Configurar CORS para permitir comunicação com o Next.js (Vercel)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,7 +22,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Registar os routers
 app.include_router(disputes_router)
+app.include_router(dispute_router)
+
 @app.get("/")
 def read_root():
     return {"status": "online", "app": "IqAI API", "module": "MVC Ready"}
@@ -35,5 +33,3 @@ def read_root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=True)
-   
-app.include_router(dispute_router)
