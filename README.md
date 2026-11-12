@@ -30,62 +30,74 @@ Em vez de depender de regras estáticas ou intervenção humana constante, o sis
 
 ---
 
-## 🚀 Como Executar o Projeto
-You can run the application here at this address: https://i-qai.vercel.app/
-Note: as the application is in the pilot phase, the address may not be available at all times!
+## 🚀 Como Executar
 
+Pode testar a aplicação diretamente na versão em produção (quando disponível):
+👉 **[https://i-qai.vercel.app/](https://i-qai.vercel.app/)**  
+*(Observação: Como o projeto se encontra em fase piloto num ambiente gratuito, o servidor backend no Render pode demorar alguns segundos a acordar no primeiro acesso).*
+
+---
+Executar no localhost
 ### Pré-requisitos
-- **Python 3.10+**
-- **Node.js 18+** e `npm`
-- Chave de API da **Groq** ([obter aqui](https://console.groq.com/))
-- Credenciais da conta de desenvolvimento **PayPal Sandbox**
+- Python 3.10+
+- Node.js 18+ e `npm`
+- Chave de API da Groq ([obtenha aqui](https://console.groq.com/))
+- Credenciais de uma conta de programador PayPal Sandbox (Client ID e Client Secret)
 
 ---
 
-### 1. Configurar o Backend (FastAPI)
+### 1. Configurar o Back-end (FastAPI)
 
-1. Navega para a pasta do backend:
+1. Navegue para a pasta do backend:
    ```bash
    cd iqai-api
-Cria e ativa um ambiente virtual:
+## Crie e ative ambiente virtual
+ - python -m venv venv
+ - venv\Scripts\activate
 
-Bash
-python -m venv venv
-# No Windows:
-venv\Scripts\activate
-# No Linux/macOS:
-source venv/bin/activate
-Instala as dependências:
+## Instale as dependências:
+ - pip install -r requirements.txt
+## Configure as variáveis de ambiente criando um ficheiro .env na raiz da pasta iqai-api:
+ - GROQ_API_KEY=tua_chave_groq_aqui
+ - PAYPAL_CLIENT_ID=teu_client_id_sandbox
+ - PAYPAL_CLIENT_SECRET=teu_client_secret_sandbox
+ - PAYPAL_API_BASE=[https://api-m.sandbox.paypal.com](https://api-m.sandbox.paypal.com)
 
-Bash
-pip install -r requirements.txt
-Configura as variáveis de ambiente no ficheiro .env:
+## Inicie o servidor do backend:
+ - uvicorn main:app --reload --port 8000
 
-Fragmento do código
+## O backend ficará disponível em http://127.0.0.1:8000
 
-GROQ_API_KEY=tua_chave_groq_aqui
-PAYPAL_CLIENT_ID=teu_client_id_sandbox
-PAYPAL_CLIENT_SECRET=teu_client_secret_sandbox
-PAYPAL_API_BASE=[https://api-m.sandbox.paypal.com](https://api-m.sandbox.paypal.com)
+## A documentação interativa (Swagger UI) pode ser acedida em http://127.0.0.1:8000/docs
 
-Inicia o servidor backend:
-Bash
-uvicorn main:app --reload --port 8000
-O backend estará disponível em http://127.0.0.1:8000
+## Configurar o Front-end (Next.js)
+ # Numa nova janela do terminal, navegue até a pasta do frontend:
+ - cd IqAI-frontend
+## Instale as dependências do Node.js:
+ - npm install
 
-A documentação Swagger UI estará disponível em http://127.0.0.1:8000/docs
+## Inicie o servidor de desenvolvimento:
+ - npm run dev
+ # O frontend estará disponível em http://localhost:3000
 
-2. Configurar o Frontend (Next.js)
-Numa nova janela de terminal, navega para a pasta do frontend:
+ ### 3\. Configurar os Webhooks no PayPal Developer (Simulador & Produção)
 
-Bash
-cd IqAI-frontend
-Instala as dependências do Node.js:
+Para que o agente autónomo receba notificações em tempo real quando ocorrem litígios na Sandbox:
 
-Bash
-npm install
-Inicia o servidor de desenvolvimento:
+1.  Aceda ao [PayPal Developer Dashboard](https://developer.paypal.com/).
 
-Bash
-npm run dev
-O frontend estará disponível em http://localhost:3000
+2.  Vá a **Apps & Credentials** e selecione a sua aplicação Sandbox.
+
+3.  Deslize até à secção **Webhooks** e clique em **Add Webhook** (ou edite o webhook existente).
+
+4.  Insira o URL de callback oficial do seu backend alojado no Render:
+
+    Plaintext
+
+    ```plaintext
+    [https://iqai-n0m8.onrender.com/api/disputes/webhook/paypal](https://iqai-n0m8.onrender.com/api/disputes/webhook/paypal)
+    ```
+
+5.  Nos **Event types** (tipos de eventos subscritos), certifique-se de selecionar pelo menos **`Customer dispute created`** e outros eventos relacionados com litígios (`Customer dispute resolved`, etc.).
+
+6.  **Como testar:** Utilize a ferramenta **Webhook Simulator** do PayPal para disparar eventos de teste para o seu backend na nuvem e ver o agente processar os dados autonomamente em segundo plano, com os logs refletidos instantaneamente na interface web.
