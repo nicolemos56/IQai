@@ -31,6 +31,8 @@ Em vez de depender de regras estáticas ou intervenção humana constante, o sis
 ---
 
 ## 🚀 Como Executar o Projeto
+You can run the application here at this address: https://i-qai.vercel.app/
+Note: as the application is in the pilot phase, the address may not be available at all times!
 
 ### Pré-requisitos
 - **Python 3.10+**
