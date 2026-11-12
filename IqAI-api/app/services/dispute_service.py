@@ -99,3 +99,23 @@ class DisputeService:
             "tool_output": tool_execution_result,
             "notification_sent": True
         }
+        
+    @staticmethod
+    async def fetch_dispute_details_from_paypal(token: str, dispute_id: str) -> dict:
+        """
+        Vai buscar diretamente à API oficial do PayPal todos os detalhes reais de um litígio,
+        incluindo motivo, montante, transações e histórico.
+        """
+        url = f"https://api-m.sandbox.paypal.com/v1/customer/disputes/{dispute_id}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                # Retorna um dicionário vazio ou erro controlado caso o ID não exista
+                return {"error": f"Falha ao obter litígio do PayPal: {response.text}"}
