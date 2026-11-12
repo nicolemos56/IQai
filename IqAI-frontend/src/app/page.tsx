@@ -22,7 +22,7 @@ export default function Home() {
   const [logs, setLogs] = useState<AgentLog[]>([]);
   const [isPolling, setIsPolling] = useState(true);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000" || "https://iqai-n0m8.onrender.com";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://iqai-n0m8.onrender.com";
 
   // Polling automático em segundo plano para capturar Webhooks e tarefas assíncronas do agente
   useEffect(() => {
